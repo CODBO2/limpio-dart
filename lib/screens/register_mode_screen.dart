@@ -13,12 +13,6 @@ class RegisterModeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Use dynamic context resolution to find the provider
-      final container = ProviderScope.containerOf(context);
-      container.read(tutorialControllerProvider).checkAndStartInteractiveTopicTourStage4(context);
-    });
-
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(

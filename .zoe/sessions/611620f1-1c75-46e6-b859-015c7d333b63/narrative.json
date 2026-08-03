@@ -1,0 +1,16 @@
+{
+  "goal": "Estoy intentando arrancar la aplicación en un dispositivo móvil conectado vía USB. Este es el comando que he utilizado para arrancar en otras oportunidades flutter run -d hqsobqheirhqw4dy pero obtengo un error que impide inicializar la aplicación.",
+  "entries": [
+    {
+      "id": "feec1d4f-72c",
+      "type": "fear",
+      "content": "verify failed — fix and retest; bad code harms reliability",
+      "context": "verify_fail",
+      "timestamp": "2026-08-03T14:24:09.216844399-04:00",
+      "active": true,
+      "category": "result"
+    }
+  ],
+  "updated_at": "2026-08-03T14:24:09.216845448-04:00",
+  "version": 3
+}

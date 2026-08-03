@@ -267,11 +267,6 @@ class _TopicDetailScreenState extends ConsumerState<TopicDetailScreen> {
     final searchActive = _searchQuery.trim().isNotEmpty;
     final dateFilterActive = _dateFilterActive;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(tutorialControllerProvider).checkAndStartInteractiveTopicTourStage3(context);
-    });
-
     final visibleActivities = _sorted(
       topicActivities
           .where(_matchesSearch)

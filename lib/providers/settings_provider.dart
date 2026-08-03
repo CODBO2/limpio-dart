@@ -89,6 +89,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     await _storage.saveSettings(updated);
   }
 
+  Future<void> setSeenScreenTutorials(List<String> seenTutorials) async {
+    final updated = state.settings.copyWith(seenScreenTutorials: seenTutorials);
+    state = state.copyWith(settings: updated);
+    await _storage.saveSettings(updated);
+  }
+
   Future<void> clearAllTutorials() async {
     final updated = state.settings.copyWith(
       hasCompletedAppTour: false,

@@ -481,13 +481,6 @@ class _RegisterTransactionScreenState extends ConsumerState<RegisterTransactionS
     final dateLabel = DateFormat('d MMM yyyy', 'es').format(_effectiveDateTime);
     final currencySymbol = _currency == 'bolivares' ? 'Bs' : '\$';
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Use dynamic context resolution to find the provider
-      final container = ProviderScope.containerOf(context);
-      container.read(tutorialControllerProvider).checkAndStartInteractiveTopicTourStage5(context);
-    });
-
     return PopScope(
       canPop: true,
       child: Scaffold(

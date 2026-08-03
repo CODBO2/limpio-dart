@@ -1,0 +1,7 @@
+{
+  "goal": "¿Está listo.",
+  "intent": "change",
+  "complexity": "single",
+  "done_when": "request satisfied with evidence",
+  "user_ask": "¿Está listo."
+}

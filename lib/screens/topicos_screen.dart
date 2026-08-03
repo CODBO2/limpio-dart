@@ -65,9 +65,6 @@ class _TopicosScreenState extends ConsumerState<TopicosScreen> {
 
   Future<void> _createTopic(String name) async {
     await ref.read(topicsProvider.notifier).add(name);
-    if (mounted) {
-      ref.read(tutorialControllerProvider).onTopicCreated(context);
-    }
   }
 
   Future<void> _handleDelete(Topic topic) async {
@@ -148,7 +145,7 @@ class _TopicosScreenState extends ConsumerState<TopicosScreen> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () => ref.read(tutorialControllerProvider).startInteractiveTopicTour(context),
+                    onPressed: () => ref.read(tutorialControllerProvider).showScreenTutorial(context, 2, force: true),
                     icon: const Icon(Icons.help_outline_rounded, size: 18, color: AppColors.textSecondary),
                     tooltip: 'Ver tutorial de esta pantalla',
                     style: IconButton.styleFrom(
