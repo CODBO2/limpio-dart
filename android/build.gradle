@@ -1,0 +1,29 @@
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = "../build"
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+// Cada módulo debe alinear Java/Kotlin. La app usa 11; plugins Android
+// sin compileOptions suelen quedar en 1.8.
+subprojects { project ->
+    project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        def kotlinJvmTarget = project.name == "app" ? "11" : "1.8"
+        kotlinOptions {
+            jvmTarget = kotlinJvmTarget
+        }
+    }
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
