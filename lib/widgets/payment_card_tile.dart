@@ -28,10 +28,12 @@ class PaymentCardTile extends StatelessWidget {
     final usageLabel =
         usageCount == 1 ? '1 compra registrada' : '$usageCount compras registradas';
 
-    if (facePath != null) {
+    if (facePath != null && bank != null) {
       return _BrandedCardTile(
         item: item,
         faceAssetPath: facePath,
+        aspectRatio: bank.cardFaceAspectRatio,
+        quarterTurns: bank.cardFaceQuarterTurns,
         usageLabel: usageLabel,
         onPress: onPress,
         onEdit: onEdit,
@@ -53,6 +55,8 @@ class _BrandedCardTile extends StatefulWidget {
   const _BrandedCardTile({
     required this.item,
     required this.faceAssetPath,
+    required this.aspectRatio,
+    required this.quarterTurns,
     required this.usageLabel,
     required this.onPress,
     required this.onEdit,
@@ -61,6 +65,8 @@ class _BrandedCardTile extends StatefulWidget {
 
   final PaymentCard item;
   final String faceAssetPath;
+  final double aspectRatio;
+  final int quarterTurns;
   final String usageLabel;
   final void Function(PaymentCard item) onPress;
   final void Function(PaymentCard item) onEdit;
@@ -149,7 +155,11 @@ class _BrandedCardTileState extends State<_BrandedCardTile>
       padding: const EdgeInsets.fromLTRB(28, 8, 28, 20),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final size = Size(constraints.maxWidth, constraints.maxWidth * 1003 / 623);
+          final aspectRatio = widget.aspectRatio;
+          final size = Size(
+            constraints.maxWidth,
+            constraints.maxWidth / aspectRatio,
+          );
 
           return Listener(
             onPointerDown: (event) {
@@ -190,13 +200,13 @@ class _BrandedCardTileState extends State<_BrandedCardTile>
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(22),
                   child: AspectRatio(
-                    aspectRatio: 623 / 1003,
+                    aspectRatio: aspectRatio,
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.asset(
-                          widget.faceAssetPath,
-                          fit: BoxFit.cover,
+                        _CardFaceImage(
+                          assetPath: widget.faceAssetPath,
+                          quarterTurns: widget.quarterTurns,
                           errorBuilder: (_, __, ___) => Container(
                             color: const Color(0xFF0A1F4D),
                             alignment: Alignment.center,
@@ -234,9 +244,9 @@ class _BrandedCardTileState extends State<_BrandedCardTile>
                                   sigmaY: 14,
                                   tileMode: TileMode.clamp,
                                 ),
-                                child: Image.asset(
-                                  widget.faceAssetPath,
-                                  fit: BoxFit.cover,
+                                child: _CardFaceImage(
+                                  assetPath: widget.faceAssetPath,
+                                  quarterTurns: widget.quarterTurns,
                                 ),
                               ),
                             ),
@@ -265,9 +275,9 @@ class _BrandedCardTileState extends State<_BrandedCardTile>
                                   sigmaY: 28,
                                   tileMode: TileMode.clamp,
                                 ),
-                                child: Image.asset(
-                                  widget.faceAssetPath,
-                                  fit: BoxFit.cover,
+                                child: _CardFaceImage(
+                                  assetPath: widget.faceAssetPath,
+                                  quarterTurns: widget.quarterTurns,
                                 ),
                               ),
                             ),
@@ -397,6 +407,31 @@ class _BrandedCardTileState extends State<_BrandedCardTile>
         },
       ),
     );
+  }
+}
+
+class _CardFaceImage extends StatelessWidget {
+  const _CardFaceImage({
+    required this.assetPath,
+    required this.quarterTurns,
+    this.errorBuilder,
+  });
+
+  final String assetPath;
+  final int quarterTurns;
+  final ImageErrorWidgetBuilder? errorBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    final image = Image.asset(
+      assetPath,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: errorBuilder,
+    );
+    if (quarterTurns == 0) return image;
+    return RotatedBox(quarterTurns: quarterTurns, child: image);
   }
 }
 

@@ -124,6 +124,14 @@ class VenezuelanBankBranding {
       accent: Color(0xFFFFD100),
       pattern: BankCardPattern.waveAccent,
     ),
+    'Banco de Venezuela (BDV)': VenezuelanBankBranding(
+      bankName: 'Banco de Venezuela (BDV)',
+      shortLabel: 'BDV',
+      primary: Color(0xFFE30613),
+      secondary: Color(0xFFB00510),
+      accent: Color(0xFFFFD100),
+      pattern: BankCardPattern.waveAccent,
+    ),
     'Banco del Tesoro': VenezuelanBankBranding(
       bankName: 'Banco del Tesoro',
       shortLabel: 'Tesoro',

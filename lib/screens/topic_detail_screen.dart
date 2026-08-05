@@ -48,9 +48,14 @@ extension on _TopicSort {
 }
 
 class TopicDetailScreen extends ConsumerStatefulWidget {
-  const TopicDetailScreen({super.key, required this.topic});
+  const TopicDetailScreen({
+    super.key,
+    required this.topic,
+    this.showFabTutorial = false,
+  });
 
   final Topic topic;
+  final bool showFabTutorial;
 
   @override
   ConsumerState<TopicDetailScreen> createState() => _TopicDetailScreenState();
@@ -66,6 +71,20 @@ class _TopicDetailScreenState extends ConsumerState<TopicDetailScreen> {
   bool get _selectionMode => _selectedIds.isNotEmpty;
   bool get _dateFilterActive =>
       _sort == _TopicSort.date && _weekStart != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showFabTutorial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Future.delayed(const Duration(milliseconds: 400), () {
+          if (!mounted) return;
+          ref.read(tutorialControllerProvider).showTopicDetailFabTutorial(context);
+        });
+      });
+    }
+  }
 
   @override
   void dispose() {

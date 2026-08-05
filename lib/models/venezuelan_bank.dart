@@ -22,7 +22,9 @@ enum VenezuelanBank {
     if (bankName == null || bankName.trim().isEmpty) return null;
     final normalized = bankName.trim().toLowerCase();
 
-    if (normalized.contains('banco de venezuela') || normalized == 'bdv') {
+    if (normalized.contains('banco de venezuela') ||
+        normalized.contains('(bdv)') ||
+        normalized == 'bdv') {
       return VenezuelanBank.bdv;
     }
     if (normalized.contains('bnc') ||
@@ -54,7 +56,17 @@ extension VenezuelanBankUi on VenezuelanBank {
   /// Diseño completo de la cara de la tarjeta (si existe).
   String? get cardFaceAssetPath => switch (this) {
         VenezuelanBank.bnc => 'assets/Cards/tarjeta_bnc.png',
+        VenezuelanBank.bdv => 'assets/Cards/Tarjeta BDV_1.png',
         _ => null,
+      };
+
+  /// Relación de aspecto del contenedor en pantalla (siempre vertical).
+  double get cardFaceAspectRatio => 623 / 1003;
+
+  /// El asset de BDV viene en horizontal; se rota 90° para mostrarlo en vertical.
+  int get cardFaceQuarterTurns => switch (this) {
+        VenezuelanBank.bdv => 1,
+        _ => 0,
       };
 
   /// Color principal si el asset de fondo no carga o como gradiente base.

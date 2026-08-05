@@ -17,6 +17,7 @@ class RegisterTransactionArgs {
     this.initialDraft,
     this.initialPaymentMethod,
     this.initialCardId,
+    this.showFormTutorial = false,
     required this.onSave,
   });
 
@@ -27,6 +28,7 @@ class RegisterTransactionArgs {
   final InvoiceScanDraft? initialDraft;
   final PaymentMethod? initialPaymentMethod;
   final String? initialCardId;
+  final bool showFormTutorial;
   final FutureOr<void> Function(Activity item) onSave;
 }
 
@@ -43,6 +45,7 @@ Route<void> buildRegisterTransactionRoute(RegisterTransactionArgs args) {
       initialDraft: args.initialDraft,
       initialPaymentMethod: args.initialPaymentMethod,
       initialCardId: args.initialCardId,
+      showFormTutorial: args.showFormTutorial,
       onSave: args.onSave,
     ),
     transitionsBuilder: (_, animation, __, child) {

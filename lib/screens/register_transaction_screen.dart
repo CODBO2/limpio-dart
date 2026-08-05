@@ -30,6 +30,7 @@ Future<void> showRegisterTransactionScreen(
   String? topicName,
   bool topicMode = false,
   InvoiceScanDraft? initialDraft,
+  bool showFormTutorial = false,
   required FutureOr<void> Function(Activity item) onSave,
 }) {
   return pushRegisterTransactionScreen(
@@ -40,6 +41,7 @@ Future<void> showRegisterTransactionScreen(
       topicName: topicName,
       topicMode: topicMode || initialTopicId != null,
       initialDraft: initialDraft,
+      showFormTutorial: showFormTutorial,
       onSave: onSave,
     ),
   );
@@ -55,6 +57,7 @@ class RegisterTransactionScreen extends ConsumerStatefulWidget {
     this.initialDraft,
     this.initialPaymentMethod,
     this.initialCardId,
+    this.showFormTutorial = false,
     required this.onSave,
   });
 
@@ -67,6 +70,7 @@ class RegisterTransactionScreen extends ConsumerStatefulWidget {
   final InvoiceScanDraft? initialDraft;
   final PaymentMethod? initialPaymentMethod;
   final String? initialCardId;
+  final bool showFormTutorial;
   final FutureOr<void> Function(Activity item) onSave;
 
   @override
@@ -107,7 +111,14 @@ class _RegisterTransactionScreenState extends ConsumerState<RegisterTransactionS
     _initFromCardContext();
     _montoController.addListener(_ensureMontoCursorAtEnd);
     _montoFocus.addListener(_onMontoFocusChange);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _refreshRateForDate());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _refreshRateForDate();
+      if (!mounted || !widget.showFormTutorial) return;
+      Future.delayed(const Duration(milliseconds: 400), () {
+        if (!mounted) return;
+        ref.read(tutorialControllerProvider).showRegisterFormTutorial(context);
+      });
+    });
   }
 
   void _initFromCardContext() {
@@ -514,271 +525,383 @@ class _RegisterTransactionScreenState extends ConsumerState<RegisterTransactionS
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _TypeSegment(
-                    isIncome: _isIncome,
-                    onChanged: (income) {
-                      setState(() {
-                        _isIncome = income;
-                        if (income) {
-                          _selectedCardId = null;
-                          _paymentMethod = PaymentMethod.pagoMovil;
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _FormCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Monto',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              currencySymbol,
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: TextField(
-                                controller: _montoController,
-                                focusNode: _montoFocus,
-                                keyboardType: TextInputType.number,
-                                enableInteractiveSelection: false,
-                                showCursor: true,
-                                inputFormatters: const [
-                                  MoneyAmountInputFormatter(),
-                                ],
-                                style: const TextStyle(
-                                  fontSize: 40,
-                                  fontWeight: FontWeight.w800,
-                                  height: 1.1,
-                                  letterSpacing: -1,
-                                ),
-                                decoration: const InputDecoration(
-                                  hintText: '0,00',
-                                  border: InputBorder.none,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                  filled: false,
-                                  contentPadding: EdgeInsets.zero,
-                                  isDense: true,
-                                ),
-                                onTap: _pinMontoCursor,
-                                onChanged: (_) => setState(() {}),
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (_currency == 'bolivares' && montoNum > 0 && rate > 0) ...[
-                          const SizedBox(height: 12),
-                          _HintRow(
-                            icon: Icons.swap_horiz_rounded,
-                            text:
-                                '≈ ${equivalenteEnUsd.toStringAsFixed(2)} \$ · tasa ${rate.toStringAsFixed(2)} · $dateLabel',
-                          ),
-                        ] else if (_currency == 'dollars' && montoNum > 0 && rate > 0) ...[
-                          const SizedBox(height: 12),
-                          _HintRow(
-                            icon: Icons.swap_horiz_rounded,
-                            text:
-                                '≈ ${CurrencyFormatter.formatBs(equivalenteEnBs)} · tasa ${rate.toStringAsFixed(2)}',
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _FormCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              _isIncome
-                                  ? Icons.trending_up_outlined
-                                  : Icons.receipt_long_outlined,
-                              color: AppColors.textSecondary,
-                              size: 22,
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: 2),
-                                child: Text(
-                                  'Concepto',
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            _ConceptModeSwitch(
-                              isList: _conceptoAsList,
-                              onChanged: _setConceptoAsList,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _conceptoController,
-                          textCapitalization: TextCapitalization.sentences,
-                          textInputAction: _conceptoAsList
-                              ? TextInputAction.newline
-                              : TextInputAction.done,
-                          keyboardType: _conceptoAsList
-                              ? TextInputType.multiline
-                              : TextInputType.text,
-                          minLines: _conceptoAsList ? 3 : 1,
-                          maxLines: _conceptoAsList ? null : 1,
-                          inputFormatters: _conceptoAsList
-                              ? const [ConceptBulletListFormatter()]
-                              : const [],
-                          decoration: InputDecoration(
-                            hintText: _conceptoAsList
-                                ? '• Ítem de la lista'
-                                : (_isIncome
-                                    ? 'Ej. Pago recibido'
-                                    : 'Ej. Compra del día'),
-                            border: InputBorder.none,
-                            enabledBorder: InputBorder.none,
-                            focusedBorder: InputBorder.none,
-                            filled: false,
-                            isDense: true,
-                            contentPadding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ],
+                  KeyedSubtree(
+                    key: TutorialKeys.registerType,
+                    child: _TypeSegment(
+                      isIncome: _isIncome,
+                      onChanged: (income) {
+                        setState(() {
+                          _isIncome = income;
+                          if (income) {
+                            _selectedCardId = null;
+                            _paymentMethod = PaymentMethod.pagoMovil;
+                          }
+                        });
+                      },
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _SectionHeader(
-                    icon: Icons.payments_outlined,
-                    title: 'Moneda',
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _OptionTile(
-                          selected: _currency == 'dollars',
-                          label: 'Dólares',
-                          subtitle: 'USD',
-                          icon: Icons.attach_money,
-                          onTap: () => _setCurrency('dollars'),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: _OptionTile(
-                          selected: _currency == 'bolivares',
-                          label: 'Bolívares',
-                          subtitle: 'VES',
-                          icon: Icons.payments_outlined,
-                          onTap: () => _setCurrency('bolivares'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (_currency == 'bolivares') ...[
-                    const SizedBox(height: 12),
-                    _FormCard(
+                  KeyedSubtree(
+                    key: TutorialKeys.registerAmount,
+                    child: _FormCard(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Tasa de cambio',
+                          Text(
+                            'Monto',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                               color: AppColors.textSecondary,
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: RateType.values.map((rt) {
-                                final selected = settings.rateType == rt;
-                                return Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ChoiceChip(
-                                    label: Text(rt.label),
-                                    selected: selected,
-                                    onSelected: (_) async {
-                                      await ref.read(settingsProvider.notifier).setRateType(rt);
-                                      await _refreshRateForDate();
-                                    },
-                                    selectedColor: AppColors.ink,
-                                    labelStyle: TextStyle(
-                                      color: selected ? Colors.white : AppColors.textSecondary,
-                                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                                    ),
-                                    side: BorderSide(
-                                      color: selected ? AppColors.ink : AppColors.border,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          if (settings.rateType == RateType.personalizado) ...[
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                const Text('1 \$ = '),
-                                Expanded(
-                                  child: TextField(
-                                    controller: _customRateController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(decimal: true),
-                                    decoration: const InputDecoration(isDense: true),
-                                    onChanged: (t) {
-                                      final n = double.tryParse(t.replaceAll(',', '.'));
-                                      if (n != null && n > 0) {
-                                        ref.read(settingsProvider.notifier).setCustomRate(n);
-                                        setState(() {
-                                          _rateForDate = n;
-                                          _rateFromHistory = false;
-                                        });
-                                      }
-                                    },
-                                  ),
+                          const SizedBox(height: 8),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Text(
+                                currencySymbol,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textMuted,
                                 ),
-                                const Text(' Bs'),
-                              ],
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: TextField(
+                                  controller: _montoController,
+                                  focusNode: _montoFocus,
+                                  keyboardType: TextInputType.number,
+                                  enableInteractiveSelection: false,
+                                  showCursor: true,
+                                  inputFormatters: const [
+                                    MoneyAmountInputFormatter(),
+                                  ],
+                                  style: const TextStyle(
+                                    fontSize: 40,
+                                    fontWeight: FontWeight.w800,
+                                    height: 1.1,
+                                    letterSpacing: -1,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    hintText: '0,00',
+                                    border: InputBorder.none,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
+                                    filled: false,
+                                    contentPadding: EdgeInsets.zero,
+                                    isDense: true,
+                                  ),
+                                  onTap: _pinMontoCursor,
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (_currency == 'bolivares' && montoNum > 0 && rate > 0) ...[
+                            const SizedBox(height: 12),
+                            _HintRow(
+                              icon: Icons.swap_horiz_rounded,
+                              text:
+                                  '≈ ${equivalenteEnUsd.toStringAsFixed(2)} \$ · tasa ${rate.toStringAsFixed(2)} · $dateLabel',
+                            ),
+                          ] else if (_currency == 'dollars' && montoNum > 0 && rate > 0) ...[
+                            const SizedBox(height: 12),
+                            _HintRow(
+                              icon: Icons.swap_horiz_rounded,
+                              text:
+                                  '≈ ${CurrencyFormatter.formatBs(equivalenteEnBs)} · tasa ${rate.toStringAsFixed(2)}',
                             ),
                           ],
-                          if (_rateForDateLoading)
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  KeyedSubtree(
+                    key: TutorialKeys.registerConcept,
+                    child: _FormCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(
+                                _isIncome
+                                    ? Icons.trending_up_outlined
+                                    : Icons.receipt_long_outlined,
+                                color: AppColors.textSecondary,
+                                size: 22,
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Padding(
+                                  padding: EdgeInsets.only(top: 2),
+                                  child: Text(
+                                    'Concepto',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              _ConceptModeSwitch(
+                                isList: _conceptoAsList,
+                                onChanged: _setConceptoAsList,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          TextField(
+                            controller: _conceptoController,
+                            textCapitalization: TextCapitalization.sentences,
+                            textInputAction: _conceptoAsList
+                                ? TextInputAction.newline
+                                : TextInputAction.done,
+                            keyboardType: _conceptoAsList
+                                ? TextInputType.multiline
+                                : TextInputType.text,
+                            minLines: _conceptoAsList ? 3 : 1,
+                            maxLines: _conceptoAsList ? null : 1,
+                            inputFormatters: _conceptoAsList
+                                ? const [ConceptBulletListFormatter()]
+                                : const [],
+                            decoration: InputDecoration(
+                              hintText: _conceptoAsList
+                                  ? '• Ítem de la lista'
+                                  : (_isIncome
+                                      ? 'Ej. Pago recibido'
+                                      : 'Ej. Compra del día'),
+                              border: InputBorder.none,
+                              enabledBorder: InputBorder.none,
+                              focusedBorder: InputBorder.none,
+                              filled: false,
+                              isDense: true,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  KeyedSubtree(
+                    key: TutorialKeys.registerCurrency,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _SectionHeader(
+                          icon: Icons.payments_outlined,
+                          title: 'Moneda',
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _OptionTile(
+                                selected: _currency == 'dollars',
+                                label: 'Dólares',
+                                subtitle: 'USD',
+                                icon: Icons.attach_money,
+                                onTap: () => _setCurrency('dollars'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _OptionTile(
+                                selected: _currency == 'bolivares',
+                                label: 'Bolívares',
+                                subtitle: 'VES',
+                                icon: Icons.payments_outlined,
+                                onTap: () => _setCurrency('bolivares'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (_currency == 'bolivares') ...[
+                          const SizedBox(height: 12),
+                          _FormCard(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                const Text(
+                                  'Tasa de cambio',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 10),
+                                SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: RateType.values.map((rt) {
+                                      final selected = settings.rateType == rt;
+                                      return Padding(
+                                        padding: const EdgeInsets.only(right: 8),
+                                        child: ChoiceChip(
+                                          label: Text(rt.label),
+                                          selected: selected,
+                                          onSelected: (_) async {
+                                            await ref
+                                                .read(settingsProvider.notifier)
+                                                .setRateType(rt);
+                                            await _refreshRateForDate();
+                                          },
+                                          selectedColor: AppColors.ink,
+                                          labelStyle: TextStyle(
+                                            color: selected
+                                                ? Colors.white
+                                                : AppColors.textSecondary,
+                                            fontWeight: selected
+                                                ? FontWeight.w700
+                                                : FontWeight.w500,
+                                          ),
+                                          side: BorderSide(
+                                            color: selected
+                                                ? AppColors.ink
+                                                : AppColors.border,
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                if (settings.rateType == RateType.personalizado) ...[
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    children: [
+                                      const Text('1 \$ = '),
+                                      Expanded(
+                                        child: TextField(
+                                          controller: _customRateController,
+                                          keyboardType:
+                                              const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                          decoration:
+                                              const InputDecoration(isDense: true),
+                                          onChanged: (t) {
+                                            final n = double.tryParse(
+                                              t.replaceAll(',', '.'),
+                                            );
+                                            if (n != null && n > 0) {
+                                              ref
+                                                  .read(settingsProvider.notifier)
+                                                  .setCustomRate(n);
+                                              setState(() {
+                                                _rateForDate = n;
+                                                _rateFromHistory = false;
+                                              });
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      const Text(' Bs'),
+                                    ],
+                                  ),
+                                ],
+                                if (_rateForDateLoading)
+                                  const Padding(
+                                    padding: EdgeInsets.only(top: 12),
+                                    child: LinearProgressIndicator(minHeight: 2),
+                                  )
+                                else if (rate > 0)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 10),
+                                    child: Text(
+                                      '${settings.rateType.label}: ${rate.toStringAsFixed(2)} Bs/\$$dateLabel'
+                                      '${_rateFromHistory ? ' (histórico)' : ''}',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textMuted,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (!_isIncome)
+                    KeyedSubtree(
+                      key: TutorialKeys.registerPayment,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const SizedBox(height: 20),
+                          _SectionHeader(
+                            icon: Icons.account_balance_wallet_outlined,
+                            title: 'Medio de pago',
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 44,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              children: [
+                                _PaymentChip(
+                                  label: PaymentMethod.pagoMovil.label,
+                                  selected:
+                                      _paymentMethod == PaymentMethod.pagoMovil,
+                                  icon: Icons.phone_android_outlined,
+                                  onTap: () => _selectPaymentMethod(
+                                    PaymentMethod.pagoMovil,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                _PaymentChip(
+                                  label: PaymentMethod.cashUsd.label,
+                                  selected:
+                                      _paymentMethod == PaymentMethod.cashUsd,
+                                  icon: Icons.attach_money,
+                                  onTap: () => _selectPaymentMethod(
+                                    PaymentMethod.cashUsd,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                _PaymentChip(
+                                  label: PaymentMethod.cashVes.label,
+                                  selected:
+                                      _paymentMethod == PaymentMethod.cashVes,
+                                  icon: Icons.payments_outlined,
+                                  onTap: () => _selectPaymentMethod(
+                                    PaymentMethod.cashVes,
+                                  ),
+                                ),
+                                ...cards.map(
+                                  (card) => Padding(
+                                    padding: const EdgeInsets.only(left: 8),
+                                    child: _PaymentChip(
+                                      label:
+                                          '${card.name} · ${card.currencyMode.shortLabel}',
+                                      selected: cardSelected &&
+                                          _selectedCardId == card.id,
+                                      icon: Icons.credit_card_outlined,
+                                      onTap: () => _selectPaymentMethod(
+                                        PaymentMethod.card,
+                                        cardId: card.id,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (cards.isEmpty)
                             const Padding(
-                              padding: EdgeInsets.only(top: 12),
-                              child: LinearProgressIndicator(minHeight: 2),
-                            )
-                          else if (rate > 0)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
+                              padding: EdgeInsets.only(top: 8),
                               child: Text(
-                                '${settings.rateType.label}: ${rate.toStringAsFixed(2)} Bs/\$$dateLabel'
-                                '${_rateFromHistory ? ' (histórico)' : ''}',
-                                style: const TextStyle(
+                                'Para tarjeta, créala en la pestaña Tarjetas.',
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textMuted,
                                 ),
@@ -787,156 +910,115 @@ class _RegisterTransactionScreenState extends ConsumerState<RegisterTransactionS
                         ],
                       ),
                     ),
-                  ],
-                  if (!_isIncome) ...[
-                    const SizedBox(height: 20),
-                    _SectionHeader(
-                      icon: Icons.account_balance_wallet_outlined,
-                      title: 'Medio de pago',
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      height: 44,
-                      child: ListView(
-                        scrollDirection: Axis.horizontal,
-                        children: [
-                          _PaymentChip(
-                            label: PaymentMethod.pagoMovil.label,
-                            selected: _paymentMethod == PaymentMethod.pagoMovil,
-                            icon: Icons.phone_android_outlined,
-                            onTap: () => _selectPaymentMethod(PaymentMethod.pagoMovil),
-                          ),
-                          const SizedBox(width: 8),
-                          _PaymentChip(
-                            label: PaymentMethod.cashUsd.label,
-                            selected: _paymentMethod == PaymentMethod.cashUsd,
-                            icon: Icons.attach_money,
-                            onTap: () => _selectPaymentMethod(PaymentMethod.cashUsd),
-                          ),
-                          const SizedBox(width: 8),
-                          _PaymentChip(
-                            label: PaymentMethod.cashVes.label,
-                            selected: _paymentMethod == PaymentMethod.cashVes,
-                            icon: Icons.payments_outlined,
-                            onTap: () => _selectPaymentMethod(PaymentMethod.cashVes),
-                          ),
-                          ...cards.map(
-                            (card) => Padding(
-                              padding: const EdgeInsets.only(left: 8),
-                              child: _PaymentChip(
-                                label:
-                                    '${card.name} · ${card.currencyMode.shortLabel}',
-                                selected:
-                                    cardSelected && _selectedCardId == card.id,
-                                icon: Icons.credit_card_outlined,
-                                onTap: () => _selectPaymentMethod(
-                                  PaymentMethod.card,
-                                  cardId: card.id,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (cards.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8),
-                        child: Text(
-                          'Para tarjeta, créala en la pestaña Tarjetas.',
-                          style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  KeyedSubtree(
+                    key: TutorialKeys.registerTopic,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 20),
+                        _SectionHeader(
+                          icon: Icons.sell_outlined,
+                          title: 'Tópico',
                         ),
-                      ),
-                  ],
-                  const SizedBox(height: 20),
-                  _SectionHeader(
-                    icon: Icons.sell_outlined,
-                    title: 'Tópico',
-                  ),
-                  const SizedBox(height: 10),
-                  _FormCard(
-                    child: topics.isEmpty
-                        ? const Text(
-                            'No hay tópicos. Créalos en la pestaña Tópicos.',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textMuted,
-                              height: 1.4,
-                            ),
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const Text(
-                                'Asocia este movimiento a un tópico (opcional).',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  height: 1.35,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  for (final topic in topics)
-                                    _TopicChip(
-                                      label: topic.name,
-                                      selected: _selectedTopicId == topic.id,
-                                      onTap: () => setState(
-                                        () => _selectedTopicId = topic.id,
+                        const SizedBox(height: 10),
+                        _FormCard(
+                          child: topics.isEmpty
+                              ? const Text(
+                                  'No hay tópicos. Créalos en la pestaña Tópicos.',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.textMuted,
+                                    height: 1.4,
+                                  ),
+                                )
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    const Text(
+                                      'Asocia este movimiento a un tópico (opcional).',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: AppColors.textSecondary,
+                                        height: 1.35,
                                       ),
                                     ),
-                                ],
-                              ),
-                            ],
-                          ),
-                  ),
-                  if (widget.topicMode) ...[
-                    const SizedBox(height: 20),
-                    _SectionHeader(
-                      icon: Icons.event_outlined,
-                      title: 'Fecha y hora',
+                                    const SizedBox(height: 12),
+                                    Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        for (final topic in topics)
+                                          _TopicChip(
+                                            label: topic.name,
+                                            selected:
+                                                _selectedTopicId == topic.id,
+                                            onTap: () => setState(
+                                              () =>
+                                                  _selectedTopicId = topic.id,
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    _FormCard(
+                  ),
+                  if (widget.topicMode)
+                    KeyedSubtree(
+                      key: TutorialKeys.registerDateTime,
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            value: _useCurrentDateTime,
-                            onChanged: (v) async {
-                              setState(() {
-                                _useCurrentDateTime = v;
-                                if (_useCurrentDateTime) {
-                                  _recordedAt = DateTime.now();
-                                }
-                              });
-                              await _refreshRateForDate();
-                            },
-                            title: const Text(
-                              'Usar ahora',
-                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                            ),
-                            subtitle: Text(
-                              _useCurrentDateTime
-                                  ? 'Se guardará con la hora actual'
-                                  : 'Elige fecha y hora abajo',
-                              style: const TextStyle(fontSize: 12),
+                          const SizedBox(height: 20),
+                          _SectionHeader(
+                            icon: Icons.event_outlined,
+                            title: 'Fecha y hora',
+                          ),
+                          const SizedBox(height: 10),
+                          _FormCard(
+                            child: Column(
+                              children: [
+                                SwitchListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  value: _useCurrentDateTime,
+                                  onChanged: (v) async {
+                                    setState(() {
+                                      _useCurrentDateTime = v;
+                                      if (_useCurrentDateTime) {
+                                        _recordedAt = DateTime.now();
+                                      }
+                                    });
+                                    await _refreshRateForDate();
+                                  },
+                                  title: const Text(
+                                    'Usar ahora',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  subtitle: Text(
+                                    _useCurrentDateTime
+                                        ? 'Se guardará con la hora actual'
+                                        : 'Elige fecha y hora abajo',
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                ),
+                                if (!_useCurrentDateTime) ...[
+                                  const SizedBox(height: 14),
+                                  _ManualDateTimePicker(
+                                    dateTime: _recordedAt,
+                                    onChanged: _setRecordedAt,
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
-                          if (!_useCurrentDateTime) ...[
-                            const SizedBox(height: 14),
-                            _ManualDateTimePicker(
-                              dateTime: _recordedAt,
-                              onChanged: _setRecordedAt,
-                            ),
-                          ],
                         ],
                       ),
                     ),
-                  ],
                 ],
               ),
             ),
