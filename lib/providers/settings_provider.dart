@@ -20,7 +20,6 @@ class SettingsState {
         rateType: settings.rateType.value,
         customRate: settings.customRate,
         rateBcv: settings.lastRateBcv,
-        rateParalelo: settings.lastRateParalelo,
       );
 
   SettingsState copyWith({
@@ -107,17 +106,12 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> refreshRates() async {
     state = state.copyWith(ratesRefreshing: true);
     try {
-      final results = await _exchangeRateService.fetchAllRates();
+      final bcv = await _exchangeRateService.fetchBcvRate();
       var updated = state.settings;
-      var gotAny = false;
+      final gotAny = bcv != null;
 
-      if (results.bcv != null) {
-        updated = updated.copyWith(lastRateBcv: results.bcv!.promedio);
-        gotAny = true;
-      }
-      if (results.paralelo != null) {
-        updated = updated.copyWith(lastRateParalelo: results.paralelo!.promedio);
-        gotAny = true;
+      if (bcv != null) {
+        updated = updated.copyWith(lastRateBcv: bcv.promedio);
       }
 
       updated = updated.copyWith(isOnline: gotAny);

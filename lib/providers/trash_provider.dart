@@ -9,6 +9,7 @@ import '../models/trash_entry.dart';
 import '../services/storage_service.dart';
 import 'activities_provider.dart';
 import 'app_providers.dart';
+import 'fixed_expense_presets_provider.dart';
 import 'topics_provider.dart';
 
 class TrashNotifier extends StateNotifier<List<TrashEntry>> {
@@ -48,6 +49,9 @@ class TrashNotifier extends StateNotifier<List<TrashEntry>> {
         .toList();
 
     await _ref.read(topicsProvider.notifier).remove(topic.id);
+    await _ref
+        .read(fixedExpensePresetsProvider.notifier)
+        .removeByTopic(topic.id);
     if (linked.isNotEmpty) {
       await _ref
           .read(activitiesProvider.notifier)

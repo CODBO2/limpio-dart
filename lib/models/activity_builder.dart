@@ -12,6 +12,7 @@ import 'payment_card.dart';
 import 'payment_method.dart';
 import 'topic.dart';
 import 'trash_entry.dart';
+import 'fixed_expense_preset.dart';
 
 const _uuid = Uuid();
 
@@ -177,5 +178,22 @@ class ActivityBuilder {
     if (raw == null || raw.isEmpty) return [];
     final list = jsonDecode(raw) as List<dynamic>;
     return list.map((e) => PaymentCard.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+  }
+
+  static List<Map<String, dynamic>> fixedExpensePresetsToJson(
+    List<FixedExpensePreset> items,
+  ) =>
+      items.map((e) => e.toJson()).toList();
+
+  static List<FixedExpensePreset> fixedExpensePresetsFromJson(String? raw) {
+    if (raw == null || raw.isEmpty) return [];
+    final list = jsonDecode(raw) as List<dynamic>;
+    return list
+        .map(
+          (e) => FixedExpensePreset.fromJson(
+            Map<String, dynamic>.from(e as Map),
+          ),
+        )
+        .toList();
   }
 }

@@ -9,14 +9,12 @@ class SummaryCards extends StatelessWidget {
     required this.totalIncome,
     required this.totalExpenses,
     required this.rateBcv,
-    required this.rateParalelo,
     required this.inBs,
   });
 
   final double totalIncome;
   final double totalExpenses;
   final double rateBcv;
-  final double rateParalelo;
   final bool inBs;
 
   @override
@@ -55,33 +53,13 @@ class SummaryCards extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                child: _SummaryCard(
-                  label: 'BCV',
-                  value: '1\$ = ${rateBcv.toStringAsFixed(2)}',
-                  icon: Icons.account_balance_outlined,
-                  iconBg: AppColors.bcvBg,
-                  iconColor: AppColors.bcvText,
-                  valueStyle: _SummaryValueStyle.secondary,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _SummaryCard(
-                  label: 'PARALELO',
-                  value: '1\$ = ${rateParalelo.toStringAsFixed(2)}',
-                  icon: Icons.show_chart_rounded,
-                  iconBg: AppColors.paraleloBg,
-                  iconColor: AppColors.paraleloText,
-                  valueStyle: _SummaryValueStyle.secondary,
-                ),
-              ),
-            ],
-          ),
+        _SummaryCard(
+          label: 'BCV',
+          value: '1\$ = ${rateBcv.toStringAsFixed(2)}',
+          icon: Icons.account_balance_outlined,
+          iconBg: AppColors.bcvBg,
+          iconColor: AppColors.bcvText,
+          valueStyle: _SummaryValueStyle.secondary,
         ),
       ],
     );

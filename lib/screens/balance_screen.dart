@@ -73,7 +73,6 @@ class BalanceScreen extends ConsumerWidget {
                       totalIncome: totals.totalIncome,
                       totalExpenses: totals.totalExpenses,
                       rateBcv: settings.lastRateBcv,
-                      rateParalelo: settings.lastRateParalelo,
                       inBs: false,
                     ),
                   ),

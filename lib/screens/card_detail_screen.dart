@@ -9,10 +9,10 @@ import '../providers/activities_provider.dart';
 import '../providers/cards_provider.dart';
 import '../providers/trash_provider.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/modals/edit_payment_card_modal.dart';
 import '../widgets/modals/register_transaction_flow.dart';
 import '../widgets/swipeable_activity_card.dart';
 import '../widgets/undo_bar.dart';
+import 'edit_payment_card_screen.dart';
 
 class CardDetailScreen extends ConsumerStatefulWidget {
   const CardDetailScreen({super.key, required this.card});
@@ -47,7 +47,7 @@ class _CardDetailScreenState extends ConsumerState<CardDetailScreen> {
   }
 
   Future<void> _editCard() async {
-    final draft = await showEditPaymentCardModal(context, editing: _card);
+    final draft = await pushEditPaymentCardScreen(context, editing: _card);
     if (draft == null || !mounted) return;
 
     await ref.read(cardsProvider.notifier).update(

@@ -24,9 +24,7 @@ class AppColors {
   static const incomeBg = Color(0xFFF5F5F5);
   static const expenseBg = Color(0xFFEEEEEE);
   static const bcvBg = Color(0xFFF5F5F5);
-  static const paraleloBg = Color(0xFFEEEEEE);
   static const bcvText = Color(0xFF171717);
-  static const paraleloText = Color(0xFF404040);
   static const snackbarDark = Color(0xFF0A0A0A);
   static const deleteSwipeBg = Color(0xFFE5E5E5);
   static const restoreSwipeBg = Color(0xFFF5F5F5);

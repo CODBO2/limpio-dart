@@ -6,6 +6,7 @@ import '../core/constants/storage_keys.dart';
 import '../models/activity.dart';
 import '../models/activity_builder.dart';
 import '../models/app_settings.dart';
+import '../models/fixed_expense_preset.dart';
 import '../models/fuente.dart';
 import '../models/payment_card.dart';
 import '../models/topic.dart';
@@ -20,6 +21,7 @@ class StorageService {
   late Box<String> _cardsBox;
   late Box<String> _trashBox;
   late Box<String> _settingsBox;
+  late Box<String> _fixedExpensePresetsBox;
 
   Future<void> init() async {
     await Hive.initFlutter();
@@ -29,6 +31,8 @@ class StorageService {
     _cardsBox = await Hive.openBox<String>(StorageKeys.cardsBox);
     _trashBox = await Hive.openBox<String>(StorageKeys.trashBox);
     _settingsBox = await Hive.openBox<String>(StorageKeys.settingsBox);
+    _fixedExpensePresetsBox =
+        await Hive.openBox<String>(StorageKeys.fixedExpensePresetsBox);
   }
 
   List<Activity> loadActivities() =>
@@ -61,6 +65,18 @@ class StorageService {
 
   Future<void> saveTrash(List<TrashEntry> trash) async {
     await _trashBox.put('list', jsonEncode(ActivityBuilder.trashToJson(trash)));
+  }
+
+  List<FixedExpensePreset> loadFixedExpensePresets() =>
+      ActivityBuilder.fixedExpensePresetsFromJson(
+        _fixedExpensePresetsBox.get('list'),
+      );
+
+  Future<void> saveFixedExpensePresets(List<FixedExpensePreset> items) async {
+    await _fixedExpensePresetsBox.put(
+      'list',
+      jsonEncode(ActivityBuilder.fixedExpensePresetsToJson(items)),
+    );
   }
 
   AppSettings loadSettings() {

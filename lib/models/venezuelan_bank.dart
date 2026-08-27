@@ -57,7 +57,7 @@ extension VenezuelanBankUi on VenezuelanBank {
   String? get cardFaceAssetPath => switch (this) {
         VenezuelanBank.bnc => 'assets/Cards/tarjeta_bnc.png',
         VenezuelanBank.bdv => 'assets/Cards/Tarjeta BDV_1.png',
-        _ => null,
+        VenezuelanBank.mercantil => 'assets/Cards/Tarjeta Mercantil.png',
       };
 
   /// Relación de aspecto del contenedor en pantalla (siempre vertical).

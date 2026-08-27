@@ -243,7 +243,6 @@ class _RegisterTransactionScreenState extends ConsumerState<RegisterTransactionS
           rateType: settings.rateType,
           customRate: settings.customRate,
           fallbackBcv: settings.lastRateBcv,
-          fallbackParalelo: settings.lastRateParalelo,
         );
 
     if (!mounted || requestId != _rateRequestId) return;

@@ -15,6 +15,7 @@ import 'models/payment_method.dart';
 import 'providers/activities_provider.dart';
 import 'providers/app_providers.dart';
 import 'providers/cards_provider.dart';
+import 'providers/fixed_expense_presets_provider.dart';
 import 'providers/main_tab_provider.dart';
 import 'providers/settings_provider.dart';
 import 'providers/topics_provider.dart';
@@ -105,6 +106,7 @@ class _BootstrapAppState extends ConsumerState<BootstrapApp> {
       ref.read(cardsProvider.notifier).load(),
       ref.read(trashProvider.notifier).load(),
       ref.read(settingsProvider.notifier).load(),
+      ref.read(fixedExpensePresetsProvider.notifier).load(),
     ]);
     final topicIds =
         ref.read(topicsProvider).map((t) => t.id).toSet();
@@ -233,6 +235,13 @@ class _BootSplash extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Image.asset(
+              'assets/logos/icon-splash.png',
+              width: 180,
+              height: 180,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 28),
             const CircularProgressIndicator(color: AppColors.green),
             const SizedBox(height: 16),
             Text(

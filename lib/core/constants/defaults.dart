@@ -1,7 +1,6 @@
 class Defaults {
   static const defaultBsToUsdRate = 40.0;
   static const rateBcvFallback = 36.5;
-  static const rateParaleloFallback = 40.0;
   static const swipeThreshold = 80.0;
   static const undoDurationSeconds = 4;
 

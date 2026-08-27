@@ -36,13 +36,7 @@ class ExchangeRateService {
     }
   }
 
-  Future<({ExchangeRateResult? bcv, ExchangeRateResult? paralelo})> fetchAllRates() async {
-    final results = await Future.wait([
-      fetchRate(ApiUrls.dolarBcv),
-      fetchRate(ApiUrls.dolarParalelo),
-    ]);
-    return (bcv: results[0], paralelo: results[1]);
-  }
+  Future<ExchangeRateResult?> fetchBcvRate() => fetchRate(ApiUrls.dolarBcv);
 
   /// Rate for a calendar date. Prefers historical endpoints; falls back to live rates.
   Future<ExchangeRateResult?> fetchRateForDate({
@@ -50,43 +44,27 @@ class ExchangeRateService {
     required RateType rateType,
     required double customRate,
     required double fallbackBcv,
-    required double fallbackParalelo,
   }) async {
     if (rateType == RateType.personalizado) {
-      final rate = customRate > 0 ? customRate : fallbackParalelo;
+      final rate = customRate > 0 ? customRate : fallbackBcv;
       return ExchangeRateResult(promedio: rate, fromHistory: false);
     }
 
     final isToday = _isSameDay(date, DateTime.now());
     if (isToday) {
-      final liveUrl =
-          rateType == RateType.bcv ? ApiUrls.dolarBcv : ApiUrls.dolarParalelo;
-      final live = await fetchRate(liveUrl);
+      final live = await fetchRate(ApiUrls.dolarBcv);
       if (live != null) return live;
-      final fallback = rateType == RateType.bcv ? fallbackBcv : fallbackParalelo;
-      return ExchangeRateResult(promedio: fallback);
+      return ExchangeRateResult(promedio: fallbackBcv);
     }
 
-    final historyUrl = rateType == RateType.bcv
-        ? ApiUrls.historicoOficial(date)
-        : ApiUrls.historicoParalelo(date);
-    final historical = await fetchRate(historyUrl, fromHistory: true);
+    final historical =
+        await fetchRate(ApiUrls.historicoOficial(date), fromHistory: true);
     if (historical != null) return historical;
 
-    // Paralelo histórico a veces no está; intenta BCV histórico como respaldo.
-    if (rateType == RateType.paralelo) {
-      final bcvHistory =
-          await fetchRate(ApiUrls.historicoOficial(date), fromHistory: true);
-      if (bcvHistory != null) return bcvHistory;
-    }
-
-    final liveUrl =
-        rateType == RateType.bcv ? ApiUrls.dolarBcv : ApiUrls.dolarParalelo;
-    final live = await fetchRate(liveUrl);
+    final live = await fetchRate(ApiUrls.dolarBcv);
     if (live != null) return live;
 
-    final fallback = rateType == RateType.bcv ? fallbackBcv : fallbackParalelo;
-    return ExchangeRateResult(promedio: fallback);
+    return ExchangeRateResult(promedio: fallbackBcv);
   }
 
   bool _isSameDay(DateTime a, DateTime b) =>

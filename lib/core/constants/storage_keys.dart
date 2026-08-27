@@ -5,4 +5,5 @@ class StorageKeys {
   static const cardsBox = 'cards';
   static const trashBox = 'trash';
   static const settingsBox = 'settings';
+  static const fixedExpensePresetsBox = 'fixed_expense_presets';
 }

@@ -262,7 +262,7 @@ class TutorialController {
       keyTarget: TutorialKeys.topicDetailFab,
       title: 'Añadir un registro',
       description:
-          'Estás dentro del tópico. Toca el botón + para crear un ingreso o egreso que quedará asociado a este tópico.',
+          'Toca el botón de expansión para elegir: nuevo registro completo o un gasto de monto fijo (atajo con un toque).',
       align: ContentAlign.top,
       currentStep: 1,
       totalSteps: 1,
@@ -560,7 +560,7 @@ class TutorialController {
                 builder: (context, controller) {
                   return TutorialTooltip(
                     title: 'Tasa de Cambio',
-                    description: 'Toca esta opción para actualizar al instante las tasas oficiales del BCV y paralelo en Venezuela.',
+                    description: 'Toca esta opción para actualizar al instante la tasa oficial del BCV.',
                     currentStep: 2,
                     totalSteps: 3,
                     nextLabel: 'Siguiente',

@@ -1,14 +1,11 @@
 enum RateType {
   bcv,
-  paralelo,
   personalizado;
 
   String get value {
     switch (this) {
       case RateType.bcv:
         return 'bcv';
-      case RateType.paralelo:
-        return 'paralelo';
       case RateType.personalizado:
         return 'personalizado';
     }
@@ -16,12 +13,12 @@ enum RateType {
 
   static RateType fromString(String? value) {
     switch (value) {
-      case 'bcv':
-        return RateType.bcv;
       case 'personalizado':
         return RateType.personalizado;
+      case 'bcv':
+      case 'paralelo': // legado → BCV
       default:
-        return RateType.paralelo;
+        return RateType.bcv;
     }
   }
 
@@ -29,8 +26,6 @@ enum RateType {
     switch (this) {
       case RateType.bcv:
         return 'BCV';
-      case RateType.paralelo:
-        return 'Paralelo';
       case RateType.personalizado:
         return 'Personalizado';
     }

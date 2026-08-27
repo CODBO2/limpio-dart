@@ -10,9 +10,9 @@ import '../providers/main_tab_provider.dart';
 import '../providers/tutorial_provider.dart';
 import '../widgets/draggable_edge_fab.dart';
 import '../widgets/empty_state.dart';
-import '../widgets/modals/edit_payment_card_modal.dart';
 import '../widgets/payment_card_tile.dart';
 import 'card_detail_screen.dart';
+import 'edit_payment_card_screen.dart';
 
 class TarjetasScreen extends ConsumerWidget {
   const TarjetasScreen({super.key});
@@ -22,7 +22,7 @@ class TarjetasScreen extends ConsumerWidget {
     WidgetRef ref, {
     PaymentCard? editing,
   }) async {
-    final draft = await showEditPaymentCardModal(context, editing: editing);
+    final draft = await pushEditPaymentCardScreen(context, editing: editing);
     if (draft == null) return;
 
     if (editing == null) {

@@ -97,14 +97,12 @@ double getEffectiveRate({
   required String rateType,
   required double customRate,
   required double rateBcv,
-  required double rateParalelo,
 }) {
   switch (rateType) {
-    case 'bcv':
-      return rateBcv > 0 ? rateBcv : Defaults.rateBcvFallback;
     case 'personalizado':
       return customRate > 0 ? customRate : Defaults.defaultBsToUsdRate;
+    case 'bcv':
     default:
-      return rateParalelo > 0 ? rateParalelo : Defaults.rateParaleloFallback;
+      return rateBcv > 0 ? rateBcv : Defaults.rateBcvFallback;
   }
 }

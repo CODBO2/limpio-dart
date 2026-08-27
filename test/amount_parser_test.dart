@@ -66,9 +66,19 @@ void main() {
           rateType: 'personalizado',
           customRate: 45,
           rateBcv: 36.5,
-          rateParalelo: 40,
         ),
         45,
+      );
+    });
+
+    test('returns BCV rate by default', () {
+      expect(
+        getEffectiveRate(
+          rateType: 'bcv',
+          customRate: 45,
+          rateBcv: 36.5,
+        ),
+        36.5,
       );
     });
   });

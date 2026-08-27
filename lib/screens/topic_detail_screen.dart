@@ -12,11 +12,13 @@ import '../providers/balance_provider.dart';
 import '../providers/trash_provider.dart';
 import '../providers/tutorial_provider.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/expandable_topic_fab.dart';
 import '../widgets/modals/register_transaction_flow.dart';
 import '../widgets/modals/topic_picker_modal.dart';
 import '../widgets/swipeable_activity_card.dart';
 import '../widgets/undo_bar.dart';
 import '../widgets/week_range_picker.dart';
+import 'fixed_expenses_screen.dart';
 enum _TopicSort {
   date,
   amountDesc,
@@ -474,14 +476,13 @@ class _TopicDetailScreenState extends ConsumerState<TopicDetailScreen> {
               ),
         floatingActionButton: _selectionMode
             ? null
-            : FloatingActionButton(
+            : ExpandableTopicFab(
                 key: TutorialKeys.topicDetailFab,
-                onPressed: () => _openRegister(),
-                backgroundColor: AppColors.fab,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                onNewRegister: () => _openRegister(),
+                onFixedAmount: () => pushFixedExpensesScreen(
+                  context,
+                  topic: widget.topic,
                 ),
-                child: const Icon(Icons.add, size: 28),
               ),
       ),
     );
